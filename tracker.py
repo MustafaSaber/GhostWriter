@@ -1,7 +1,3 @@
-# USAGE
-# python tracker.py --video ball_tracking_example.mp4
-# python tracker.py
-
 # import the necessary packages
 import pyrealsense2 as rs
 import numpy as np
@@ -19,7 +15,7 @@ RESIZED_HEIGHT = 450
 FPS = 30
 THRESHOLD_HEIGHT = 215
 
-#TODO: calibrate dynamically and calculate prespective effect
+# TODO: calibrate dynamically and calculate prespective effect
 TOP_LEFT = (550, 280)
 TOP_RIGHT = (180, 280)
 BOTTOM_LEFT = (450, 500)
@@ -104,7 +100,7 @@ pipeline = createPipline()
 filters = createFilters()
 lastPoint = None
 paper = np.zeros((BOTTOM_LEFT[1] - TOP_LEFT[1], TOP_LEFT[0] - TOP_RIGHT[0], 3), np.uint8)
-prespectiveFallOff = (TOP_LEFT[0] - TOP_RIGHT[0])/(BOTTOM_LEFT[0] - BOTTOM_RIGHT[0])
+prespectiveFallOff = (TOP_LEFT[0] - TOP_RIGHT[0]) / (BOTTOM_LEFT[0] - BOTTOM_RIGHT[0])
 
 time.sleep(2.0)
 
@@ -124,7 +120,7 @@ while True:
     depth = np.asanyarray(depth.get_data())
 
     frameResized = imutils.resize(frame, width=RESIZED_WIDTH)
-	#TODO: use object detectio instead of color detection
+    # TODO: use object detectio instead of color detection
     cnts = Contours(frameResized)
     center = None
 
@@ -137,18 +133,19 @@ while True:
         if radius >= ALLOWED_RADIUS:
             (cXr, cYr), (cX, cY) = getCenter(center, (x, y))
             Z = int(depth[cY, cX])
-            dZ = min(max(0, int(Z-TOP_LEFT[1])), BOTTOM_LEFT[1])
-            if cY < THRESHOLD_HEIGHT or not (TOP_LEFT[1] < Z < BOTTOM_LEFT[1]) or not((cX-TOP_RIGHT[0]) < cX < TOP_LEFT[0]):
+            dZ = min(max(0, int(Z - TOP_LEFT[1])), BOTTOM_LEFT[1])
+            if cY < THRESHOLD_HEIGHT or not (TOP_LEFT[1] < Z < BOTTOM_LEFT[1]) or not (
+                    (cX - TOP_RIGHT[0]) < cX < TOP_LEFT[0]):
                 lastPoint = None
             else:
-                distanceFactor = ((1 - dZ/paper.shape[1]) + (dZ/paper.shape[1]) * prespectiveFallOff)
-                dX = round((min(max(0, int(cX-TOP_RIGHT[0])), TOP_LEFT[0]) - paper.shape[0]/2) * distanceFactor + paper.shape[0]/2)
+                distanceFactor = ((1 - dZ / paper.shape[1]) + (dZ / paper.shape[1]) * prespectiveFallOff)
+                dX = round((min(max(0, int(cX - TOP_RIGHT[0])), TOP_LEFT[0]) - paper.shape[0] / 2) * distanceFactor +
+                           paper.shape[0] / 2)
                 if lastPoint is None:
                     lastPoint = (dX, dZ)
                 else:
                     cv2.line(paper, lastPoint, (dX, dZ), (255, 255, 255), 1)
                     lastPoint = (dX, dZ)
-
 
             # TODO: remove after debugging
             ###################################################################
