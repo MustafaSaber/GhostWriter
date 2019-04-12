@@ -3,7 +3,7 @@ import numpy as np
 import imutils
 import constants
 import cv2
-
+import align
 
 class Calibrator:
     def claimEdge(self, pipeline, filters, edge):
@@ -13,6 +13,7 @@ class Calibrator:
             depth = utility.PostProcessing(filters, depth)
             colorized_depth = utility.ColorizeDepth(depth)
             depth = np.asanyarray(depth.get_data())
+            _, frame = align.align(frame, depth, self.DEPTH_SCALE,constants.THRESHOLD)
 
             frameResized = imutils.resize(frame, width=constants.RESIZED_WIDTH)
             # TODO: use object detection instead of color detection

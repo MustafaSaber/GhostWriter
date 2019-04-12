@@ -6,14 +6,13 @@ import calibration
 import utility
 import imutils
 import time
-
+import align
 pipeline, profile = utility.createPipline()
 filters = utility.createFilters()
 lastPoint = None
 time.sleep(2.0)
 
 config = calibration.Calibrator(pipeline, profile, filters)
-
 paper = np.zeros((config.PAPER_HEIGHT, config.PAPER_WIDTH, 3), np.uint8)
 print(paper.shape)
 
@@ -30,6 +29,7 @@ while True:
     depth = utility.PostProcessing(filters, depth)
     colorized_depth = utility.ColorizeDepth(depth)
     depth = np.asanyarray(depth.get_data())
+    _,frame = align.align(frame,depth,config.DEPTH_SCALE,constants.THRESHOLD)
 
     frameResized = imutils.resize(frame, width=constants.RESIZED_WIDTH)
     # TODO: use object detection instead of color detection

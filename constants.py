@@ -6,7 +6,7 @@ RESIZED_HEIGHT = 450
 FPS = 30
 MARGIN = 5
 DEPTH_SCALE = 0
-
+THRESHOLD = 750.00
 EdgesStr = ["TopLeft", "TopRight", "BottomRight", "BottomLeft"]
 blueLower = (100, 150, 20)
 blueUpper = (130, 255, 255)
