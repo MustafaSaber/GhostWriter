@@ -59,7 +59,6 @@ def Contours(frameResized):
     contours = imutils.grab_contours(contours)
     return contours
 
-
 def getCenter(centerPoint, Centroid):
     (cXre, cYre) = centerPoint
     (X, Y) = Centroid
