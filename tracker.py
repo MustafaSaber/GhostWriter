@@ -7,6 +7,23 @@ import utility
 import imutils
 import time
 import align
+from fpdf import FPDF
+from PIL import Image
+from PIL import ImageOps
+
+
+def makePdf(pdfFileName, listPages, dir = ''):
+    if (dir):
+        dir += "/"
+    cover = Image.open(dir + listPages)
+    width, height = cover.size
+    pdf = FPDF(unit = "pt", format = [width, height])
+    pdf.add_page()
+    pdf.image(dir + listPages,0,0)
+    pdf.output(dir + pdfFileName + ".pdf", "F")
+    print("pdf")
+
+
 pipeline, profile = utility.createPipline()
 filters = utility.createFilters()
 lastPoint = None
@@ -24,6 +41,13 @@ while True:
         break
     elif key == ord("c"):
         paper = np.zeros((config.PAPER_HEIGHT, config.PAPER_WIDTH, 3), np.uint8)
+
+    elif key == ord("s"):
+        cv2.imwrite("filename.png", paper)
+        im = Image.open("filename.png")
+        im = ImageOps.mirror(im)
+        im.save("filename2.png")
+        makePdf("firstTry", "filename2.png")
 
     frame, depth = utility.Fetch(pipeline)
     depth = utility.PostProcessing(filters, depth)
