@@ -59,6 +59,7 @@ def Contours(frameResized):
     contours = imutils.grab_contours(contours)
     return contours
 
+
 def getCenter(centerPoint, Centroid):
     (cXre, cYre) = centerPoint
     (X, Y) = Centroid
@@ -74,3 +75,21 @@ def PostProcessing(Filters, DepthFrame):
     DepthFrame = Filters["T"].process(DepthFrame)
     DepthFrame = Filters["DZ"].process(DepthFrame)
     return DepthFrame
+
+
+def align(frame, depth_frame, depth_scale, threshold=1000.00):
+    # (width, height,_) = frame.shape
+    threshold /= depth_scale
+    new_depth = depth_frame.copy()
+    newframe = frame.copy()
+    new_depth[new_depth > threshold] = 0
+    new_depth[new_depth > 0.0] = 1
+
+    new_depth = np.dstack((new_depth, new_depth, new_depth))
+
+    newframe = np.multiply(newframe, new_depth.real, dtype="uint8")
+    return frame, newframe
+
+
+def transformer(x, y, depthInt, scale):
+    return rs.rs2_deproject_pixel_to_point(depthInt, [x, y], scale)

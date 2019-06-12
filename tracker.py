@@ -6,31 +6,33 @@ import calibration
 import utility
 import imutils
 import time
-import align
+import pyrealsense2 as rs
 from fpdf import FPDF
 from PIL import Image
 from PIL import ImageOps
 
 
-def makePdf(pdfFileName, listPages, dir = ''):
-    if (dir):
+def makePdf(pdfFileName, listPages, dir=''):
+    if dir:
         dir += "/"
     cover = Image.open(dir + listPages)
     width, height = cover.size
-    pdf = FPDF(unit = "pt", format = [width, height])
+    pdf = FPDF(unit="pt", format=[width, height])
     pdf.add_page()
-    pdf.image(dir + listPages,0,0)
+    pdf.image(dir + listPages, 0, 0)
     pdf.output(dir + pdfFileName + ".pdf", "F")
     print("pdf")
 
 
 pipeline, profile = utility.createPipline()
 filters = utility.createFilters()
-lastPoint = None
+points = None
+pts = None
+drawn = []
 time.sleep(2.0)
 
 config = calibration.Calibrator(pipeline, profile, filters)
-paper = np.zeros((config.PAPER_HEIGHT, config.PAPER_WIDTH, 3), np.uint8)
+paper = np.zeros((config.PAPER_HEIGHT, config.PAPER_WIDTH, 3), np.uint8) + 255
 print(paper.shape)
 
 # keep looping
@@ -40,7 +42,7 @@ while True:
         pipeline.stop()
         break
     elif key == ord("c"):
-        paper = np.zeros((config.PAPER_HEIGHT, config.PAPER_WIDTH, 3), np.uint8)
+        paper = np.zeros((config.PAPER_HEIGHT, config.PAPER_WIDTH, 3), np.uint8) + 255
 
     elif key == ord("s"):
         cv2.imwrite("filename.png", paper)
@@ -50,10 +52,12 @@ while True:
         makePdf("firstTry", "filename2.png")
 
     frame, depth = utility.Fetch(pipeline)
+    intrinsics = depth.profile.as_video_stream_profile().intrinsics
     depth = utility.PostProcessing(filters, depth)
+
     colorized_depth = utility.ColorizeDepth(depth)
     depth = np.asanyarray(depth.get_data())
-    _,frame = align.align(frame,depth,config.DEPTH_SCALE,constants.THRESHOLD)
+    _, frame = utility.align(frame, depth, config.DEPTH_SCALE, constants.THRESHOLD)
 
     frameResized = imutils.resize(frame, width=constants.RESIZED_WIDTH)
     # TODO: use object detection instead of color detection
@@ -69,21 +73,28 @@ while True:
         if radius >= constants.ALLOWED_RADIUS:
             # TODO: add screen to world x,y transformer
             (cXr, cYr), (cX, cY) = utility.getCenter(center, (x, y))
+            cXp, cYp, _ = utility.transformer(cX, cY, intrinsics, config.DEPTH_SCALE)
             # TODO: sync color and depth frame to avoid wrong depth calculation
             Z = int(depth[cY, cX] * config.DEPTH_SCALE)
             dZ = min(max(0, int(Z - config.Near)), config.Far)
             if cY < config.HEIGHT_THRESHOLD or not (config.Near < Z < config.Far) or not (
                     config.Right < cX < config.Left):
-                lastPoint = None
+                if points is not None:
+                    drawn.append(points)
+                points = None
+
             else:
                 distanceFactor = ((1 - dZ / paper.shape[1]) + (dZ / config.PAPER_HEIGHT) * config.PrespectiveEffect)
-                dX = round((min(max(0, int(cX - config.Right)), config.Left) - config.PAPER_WIDTH / 2) * distanceFactor
-                           + config.PAPER_WIDTH / 2)
-                if lastPoint is None:
-                    lastPoint = (dX, dZ)
+                dX = round(
+                    (min(max(0, int(cX - config.Right)), config.Left)))  # - config.PAPER_WIDTH / 2) * distanceFactor
+                # + config.PAPER_WIDTH / 2)
+                if points is None:
+                    points = [[dX, dZ]]
                 else:
-                    cv2.line(paper, lastPoint, (dX, dZ), (255, 255, 255), 1)
-                    lastPoint = (dX, dZ)
+                    points.append([dX, dZ])
+                    pts = np.asanyarray(points, np.int32).reshape((-1, 1, 2))
+                    cv2.polylines(paper, [pts], False, (0, 0, 0), lineType=cv2.LINE_AA)
+
 
             # TODO: remove after debugging
             ###################################################################
@@ -95,7 +106,9 @@ while True:
             ###################################################################
     viewport = paper.copy()
     viewport = cv2.flip(viewport, 1)
-
+    # viewport = cv2.blur(viewport, (5, 5), 0)
+    # kernel = np.ones((5, 5), np.float32) / 25
+    # viewport = cv2.filter2D(viewport, -1, kernel)
     cv2.namedWindow('Frame', cv2.WINDOW_AUTOSIZE)
     cv2.namedWindow('Depth', cv2.WINDOW_AUTOSIZE)
     cv2.namedWindow('Paper', cv2.WINDOW_NORMAL)
@@ -105,5 +118,8 @@ while True:
     cv2.imshow("Depth", colorized_depth)
     cv2.imshow("Paper", viewport)
 
+with open('drawn.txt', 'w') as f:
+    for item in drawn:
+        f.write("%s\n" % item)
 # close all windows
 cv2.destroyAllWindows()
