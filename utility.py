@@ -41,7 +41,8 @@ def Fetch(Pipeline):
     RGB_frame = np.asanyarray(color_frame_preprocessing.get_data())
     grey_color = 153
     depth_image_3D = np.dstack((depth_image, depth_image, depth_image))
-    bg_removed = np.where((depth_image_3D > constants.clipping_threshold) | (depth_image_3D <= 0), grey_color, RGB_frame)
+    bg_removed = np.where((depth_image_3D > constants.clipping_threshold)
+                          | (depth_image_3D <= 0), grey_color, RGB_frame)
     return bg_removed, Depth_data
 
 
@@ -94,17 +95,3 @@ def align(frame, colorized_depth):
 def transformer(x, y, depthInt, scale):
     return rs.rs2_deproject_pixel_to_point(depthInt, [x, y], scale)
 
-
-def contours_to_distance(contours, depth, depth_scale):
-    min_z = math.inf
-    min_contour = None
-    for c in contours:
-        ((x, y), radius) = cv2.minEnclosingCircle(c)
-        M = cv2.moments(c)
-        center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
-        (cXr, cYr), (cX, cY) = getCenter(center, (x, y))
-        Z = round(depth[cY, cX] * depth_scale)
-        if Z < min_z:
-            min_contour = c
-
-    return min_contour
