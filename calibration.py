@@ -61,7 +61,7 @@ class Calibrator:
         self.HEIGHT_THRESHOLD = 0
         for edgeStr in constants.EdgesStr:
             self.claimEdge(pipeline, filters, edgeStr)
-        self.HEIGHT_THRESHOLD = 230  # (self.HEIGHT_THRESHOLD / 4) - constants.MARGIN
+        self.HEIGHT_THRESHOLD = (self.HEIGHT_THRESHOLD / 4) - constants.MARGIN
         print("Current Threshold is {}".format(self.HEIGHT_THRESHOLD))
         self.PAPER_WIDTH = self.Edges["TopLeft"][0] - self.Edges["TopRight"][0]
         self.PAPER_HEIGHT = (self.Edges["BottomLeft"][1] - self.Edges["TopLeft"][1]) + (2 * constants.MARGIN)

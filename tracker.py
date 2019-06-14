@@ -96,7 +96,6 @@ while True:
                     pts = np.asanyarray(points, np.int32).reshape((-1, 1, 2))
                     cv2.polylines(paper, [pts], False, (0, 0, 0), lineType=cv2.LINE_AA)
 
-
             # TODO: remove after debugging
             ###################################################################
             text = "X: " + str(cX) + ",Y: " + str(cY) + ",Z: " + str(Z)

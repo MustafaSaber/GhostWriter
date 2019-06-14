@@ -10,3 +10,4 @@ THRESHOLD = 750.00
 EdgesStr = ["TopLeft", "TopRight", "BottomRight", "BottomLeft"]
 blueLower = (100, 150, 20)
 blueUpper = (130, 255, 255)
+clipping_threshold = 600
