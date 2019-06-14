@@ -57,10 +57,11 @@ while True:
 
     colorized_depth = utility.ColorizeDepth(depth)
     depth = np.asanyarray(depth.get_data())
-    _, frame = utility.align(frame, depth, config.DEPTH_SCALE, constants.THRESHOLD)
+    # _, frame = utility.align(frame, colorized_depth)
 
     frameResized = imutils.resize(frame, width=constants.RESIZED_WIDTH)
     # TODO: use object detection instead of color detection
+
     cnts = utility.Contours(frameResized)
     center = None
 

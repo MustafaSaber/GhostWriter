@@ -4,7 +4,7 @@ import imutils
 import constants
 import cv2
 import configure
-
+import math
 
 def createPipline():
     configure.load()
@@ -77,19 +77,29 @@ def PostProcessing(Filters, DepthFrame):
     return DepthFrame
 
 
-def align(frame, depth_frame, depth_scale, threshold=1000.00):
-    # (width, height,_) = frame.shape
-    threshold /= depth_scale
-    new_depth = depth_frame.copy()
+def align(frame, colorized_depth):
+    new_depth = colorized_depth.copy()
     newframe = frame.copy()
-    new_depth[new_depth > threshold] = 0
-    new_depth[new_depth > 0.0] = 1
-
-    new_depth = np.dstack((new_depth, new_depth, new_depth))
-
-    newframe = np.multiply(newframe, new_depth.real, dtype="uint8")
+    new_depth[new_depth > 0] = 1
+    new_depth[new_depth == 0] = 0
+    newframe = np.multiply(newframe, new_depth, dtype="uint8")
     return frame, newframe
 
 
 def transformer(x, y, depthInt, scale):
     return rs.rs2_deproject_pixel_to_point(depthInt, [x, y], scale)
+
+
+def contours_to_distance(contours, depth, depth_scale):
+    min_z = math.inf
+    min_contour = None
+    for c in contours:
+        ((x, y), radius) = cv2.minEnclosingCircle(c)
+        M = cv2.moments(c)
+        center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
+        (cXr, cYr), (cX, cY) = getCenter(center, (x, y))
+        Z = round(depth[cY, cX] * depth_scale)
+        if Z < min_z:
+            min_contour = c
+
+    return min_contour

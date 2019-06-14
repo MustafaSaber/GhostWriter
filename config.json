@@ -40,7 +40,7 @@
   "param-censusenablereg-vdiameter": "9",
   "param-censususize": "9",
   "param-censusvsize": "9",
-  "param-depthclampmax": "65536",
+  "param-depthclampmax": "500",
   "param-depthclampmin": "0",
   "param-depthunits": "3000",
   "param-disableraucolor": "0",

@@ -12,7 +12,7 @@ class Calibrator:
             colorized_depth = utility.ColorizeDepth(depth)
 
             depth = np.asanyarray(depth.get_data())
-            _, frame = utility.align(frame, depth, self.DEPTH_SCALE, constants.THRESHOLD)
+            #            _, frame = utility.align(frame, colorized_depth)
             frameResized = imutils.resize(frame, width=constants.RESIZED_WIDTH)
             # TODO: use object detection instead of color detection
 
@@ -20,11 +20,12 @@ class Calibrator:
             center = None
 
             if len(cnts) > 0:
+                # TODO: nearest area
                 c = max(cnts, key=cv2.contourArea)
                 ((x, y), radius) = cv2.minEnclosingCircle(c)
                 M = cv2.moments(c)
                 center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
-
+                # TODO: Recosider CONSTANT
                 if radius >= constants.ALLOWED_RADIUS:
                     (cXr, cYr), (cX, cY) = utility.getCenter(center, (x, y))
                     Z = int(depth[cY, cX] * self.DEPTH_SCALE)
@@ -60,7 +61,8 @@ class Calibrator:
         self.HEIGHT_THRESHOLD = 0
         for edgeStr in constants.EdgesStr:
             self.claimEdge(pipeline, filters, edgeStr)
-        self.HEIGHT_THRESHOLD = (self.HEIGHT_THRESHOLD / 4) - constants.MARGIN
+        self.HEIGHT_THRESHOLD = 230  # (self.HEIGHT_THRESHOLD / 4) - constants.MARGIN
+        print("Current Threshold is {}".format(self.HEIGHT_THRESHOLD))
         self.PAPER_WIDTH = self.Edges["TopLeft"][0] - self.Edges["TopRight"][0]
         self.PAPER_HEIGHT = (self.Edges["BottomLeft"][1] - self.Edges["TopLeft"][1]) + (2 * constants.MARGIN)
         self.Near = self.Edges["TopLeft"][1] - constants.MARGIN
