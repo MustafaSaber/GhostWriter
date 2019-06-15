@@ -90,6 +90,7 @@ while True:
                     drawn.append(points)
                 points = None
 
+
             else:
                 distanceFactor = ((1 - dZ / paper.shape[1]) + (dZ / config.PAPER_HEIGHT) * config.PrespectiveEffect)
                 dX = round(
