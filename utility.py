@@ -39,10 +39,10 @@ def Fetch(Pipeline):
     Depth_data = frames.get_depth_frame()
     depth_image = np.asanyarray(Depth_data.get_data())
     RGB_frame = np.asanyarray(color_frame_preprocessing.get_data())
-    grey_color = 153
-    depth_image_3D = np.dstack((depth_image, depth_image, depth_image))
-    bg_removed = np.where((depth_image_3D > constants.clipping_threshold) | (depth_image_3D <= 0), grey_color, RGB_frame)
-    return bg_removed, Depth_data
+    # grey_color = 153
+    # depth_image_3D = np.dstack((depth_image, depth_image, depth_image))
+    # bg_removed = np.where((depth_image_3D > constants.clipping_threshold) | (depth_image_3D <= 0), grey_color, RGB_frame)
+    return RGB_frame, Depth_data
 
 
 def ColorizeDepth(DepthFrame):

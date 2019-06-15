@@ -43,6 +43,8 @@ while True:
         break
     elif key == ord("c"):
         paper = np.zeros((config.PAPER_HEIGHT, config.PAPER_WIDTH, 3), np.uint8) + 255
+        drawn = []
+        points = None
 
     elif key == ord("s"):
         cv2.imwrite("filename.png", paper)
