@@ -69,6 +69,7 @@ while True:
 
     if len(cnts) > 0:
         c = max(cnts, key=cv2.contourArea)
+        extBot = tuple(c[c[:, :, 1].argmax()][0])
         ((x, y), radius) = cv2.minEnclosingCircle(c)
         M = cv2.moments(c)
         center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
@@ -77,6 +78,9 @@ while True:
             # TODO: add screen to world x,y transformer
             (cXr, cYr), (cX, cY) = utility.getCenter(center, (x, y))
             cXp, cYp, _ = utility.transformer(cX, cY, intrinsics, config.DEPTH_SCALE)
+            # cX, cY = extBot
+            # cX = int(round(cX * (constants.WIDTH / constants.RESIZED_WIDTH)))
+            # cY = int(round(cY * (constants.HEIGHT / constants.RESIZED_HEIGHT))) - 15
             # TODO: sync color and depth frame to avoid wrong depth calculation
             Z = int(depth[cY, cX] * config.DEPTH_SCALE)
             dZ = min(max(0, int(Z - config.Near)), config.Far)

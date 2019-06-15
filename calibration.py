@@ -22,12 +22,16 @@ class Calibrator:
             if len(cnts) > 0:
                 # TODO: nearest area
                 c = max(cnts, key=cv2.contourArea)
+                extBot = tuple(c[c[:, :, 1].argmax()][0])
                 ((x, y), radius) = cv2.minEnclosingCircle(c)
                 M = cv2.moments(c)
                 center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
                 # TODO: Recosider CONSTANT
                 if radius >= constants.ALLOWED_RADIUS:
                     (cXr, cYr), (cX, cY) = utility.getCenter(center, (x, y))
+                    # cX, cY = extBot
+                    # cX = int(round(cX * (constants.WIDTH / constants.RESIZED_WIDTH)))
+                    # cY = int(round(cY * (constants.HEIGHT / constants.RESIZED_HEIGHT))) - 15
                     Z = int(depth[cY, cX] * self.DEPTH_SCALE)
 
                     # TODO: remove after debugging
@@ -35,8 +39,8 @@ class Calibrator:
                     text = "X: " + str(cX) + ",Y: " + str(cY) + ",Z: " + str(Z)
                     cv2.circle(frameResized, (int(x), int(y)), int(radius), (0, 255, 255), 2)
                     cv2.putText(frameResized, text, (0, 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (125, 125, 125), 2)
-                    cv2.circle(frameResized, (cXr, cYr), 2, (0, 0, 255), -1)
-                    cv2.circle(colorized_depth, (cX, cY), 2, (0, 255, 0), -1)
+                    cv2.circle(frameResized, (cX, cY), 2, (0, 0, 255), -1)
+                    cv2.circle(colorized_depth, (cXr, cYr), 2, (0, 255, 0), -1)
                     ###################################################################
             else:
                 cX, cY, Z = 0, 0, 0
