@@ -39,8 +39,8 @@ class Calibrator:
                     text = "X: " + str(cX) + ",Y: " + str(cY) + ",Z: " + str(Z)
                     cv2.circle(frameResized, (int(x), int(y)), int(radius), (0, 255, 255), 2)
                     cv2.putText(frameResized, text, (0, 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (125, 125, 125), 2)
-                    cv2.circle(frameResized, (cX, cY), 2, (0, 0, 255), -1)
-                    cv2.circle(colorized_depth, (cXr, cYr), 2, (0, 255, 0), -1)
+                    cv2.circle(frameResized, (cXr, cYr), 2, (0, 0, 255), -1)
+                    cv2.circle(colorized_depth, (cX, cY), 2, (0, 255, 0), -1)
                     ###################################################################
             else:
                 cX, cY, Z = 0, 0, 0

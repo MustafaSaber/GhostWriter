@@ -33,7 +33,7 @@ def createFilters():
 
 def Fetch(Pipeline):
     frames = Pipeline.wait_for_frames()
-    align = rs.align(rs.stream.color)
+    align = rs.align(rs.stream.depth)
     frames = align.process(frames)
     color_frame_preprocessing = frames.get_color_frame()
     Depth_data = frames.get_depth_frame()

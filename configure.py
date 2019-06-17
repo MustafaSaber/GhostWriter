@@ -34,7 +34,7 @@ def load():
             advnc_mode = rs.rs400_advanced_mode(dev)
             print("Advanced mode is", "enabled" if advnc_mode.is_enabled() else "disabled")
 
-        with open('config.json') as f:
+        with open('Hand.json') as f:
             json_dict = json.loads(f.read())
         json_string = json.dumps(json_dict)
         advnc_mode.load_json(json_string)

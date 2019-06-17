@@ -10,6 +10,8 @@ import pyrealsense2 as rs
 from fpdf import FPDF
 from PIL import Image
 from PIL import ImageOps
+import gcv_ocr
+import time
 
 
 def makePdf(pdfFileName, listPages, dir=''):
@@ -47,11 +49,18 @@ while True:
         points = None
 
     elif key == ord("s"):
-        cv2.imwrite("filename.png", paper)
-        im = Image.open("filename.png")
+        timestr = time.strftime("%Y%m%d_%H%M")
+        cv2.imwrite("document/image/image_{}.png".format(timestr), paper)
+        im = Image.open("document/image/image_{}.png".format(timestr))
         im = ImageOps.mirror(im)
-        im.save("filename2.png")
-        makePdf("firstTry", "filename2.png")
+        im.save("document/image/image_{}.png".format(timestr))
+        makePdf("document/pdf/pdf_{}.png".format(timestr), "document/image/image_{}.png".format(timestr))
+        text = gcv_ocr.detect_text("document/image/image_{}.png".format(timestr))
+        gcv_ocr.write_ON_File(text,timestr)
+
+    # elif key == ord("o"):
+
+
 
     frame, depth = utility.Fetch(pipeline)
     intrinsics = depth.profile.as_video_stream_profile().intrinsics
