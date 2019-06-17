@@ -22,6 +22,7 @@ def load():
         advnc_mode = rs.rs400_advanced_mode(dev)
         print("Advanced mode is", "enabled" if advnc_mode.is_enabled() else "disabled")
 
+
         # Loop until we successfully enable advanced mode
         while not advnc_mode.is_enabled():
             print("Trying to enable advanced mode...")
