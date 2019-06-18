@@ -13,6 +13,8 @@ from PIL import ImageOps
 import gcv_ocr
 import time
 
+timestr = time.strftime("%Y%m%d_%H%M")
+
 
 def makePdf(pdfFileName, listPages, dir=''):
     if dir:
@@ -134,8 +136,8 @@ while True:
     cv2.imshow("Depth", colorized_depth)
     cv2.imshow("Paper", viewport)
 
-with open('drawn.txt', 'w') as f:
+with open('SavedPoints\points_{}.txt'.format(timestr), 'w') as f:
     for item in drawn:
-        f.write("%s\n" % item)
+        f.write("%s\n".replace("[","").replace("]","") % item)
 # close all windows
 cv2.destroyAllWindows()

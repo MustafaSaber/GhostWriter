@@ -9,7 +9,7 @@ DS5_product_ids = ["0AD1", "0AD2", "0AD3", "0AD4", "0AD5", "0AF6", "0AFE", "0AFF
 def find_device_that_supports_advanced_mode():
     ctx = rs.context()
     ds5_dev = rs.device()
-    devices = ctx.query_devices();
+    devices = ctx.query_devices()
     for dev in devices:
         if dev.supports(rs.camera_info.product_id) and str(dev.get_info(rs.camera_info.product_id)) in DS5_product_ids:
             return dev
@@ -35,7 +35,7 @@ def load():
             advnc_mode = rs.rs400_advanced_mode(dev)
             print("Advanced mode is", "enabled" if advnc_mode.is_enabled() else "disabled")
 
-        with open('Hand.json') as f:
+        with open('configs/Hand.json') as f:
             json_dict = json.loads(f.read())
         json_string = json.dumps(json_dict)
         advnc_mode.load_json(json_string)

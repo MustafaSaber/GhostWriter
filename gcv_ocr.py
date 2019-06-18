@@ -9,7 +9,7 @@ def detect_text(path):
     import os
     import io
     from google.cloud import vision
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "ghostwriterocr-f95f43035269.json"
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "auth/ghostwriterocr-f95f43035269.json"
     client = vision.ImageAnnotatorClient()
     with io.open(path, 'rb') as image_file:
         content = image_file.read()
