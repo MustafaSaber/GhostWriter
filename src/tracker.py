@@ -8,7 +8,7 @@ import time
 import os
 
 timestr = time.strftime("%Y%m%d_%H%M%S")
-pdf_folder = 'src/document/image/pdf{}'.format(timestr)
+pdf_folder = '../document/image/pdf{}'.format(timestr)
 os.mkdir(pdf_folder)
 
 pipeline, profile = utility.createPipline()
@@ -35,7 +35,7 @@ while True:
 
     elif key == ord("s"):
         utility.saveJPG(pdf_folder, paper)
-        utility.savePGF("pdf_{}".format(timestr), pdf_folder, 'src/document/pdf')
+        utility.savePGF("pdf_{}".format(timestr), pdf_folder, '../document/pdf')
         text = gcv_ocr.detect_text(pdf_folder)
         gcv_ocr.write_ON_File(text, timestr)
 

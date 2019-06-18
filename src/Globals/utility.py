@@ -103,8 +103,8 @@ def transformer(x, y, depthInt, scale):
 
 def saveJPG(pdf_folder, paper):
     timestr = time.strftime("%Y%m%d_%H%M%S")
-    cv2.imwrite("src/document/image/image_{}.png".format(timestr), paper)
-    im = Image.open("src/document/image/image_{}.png".format(timestr))
+    cv2.imwrite("../document/image/image_{}.png".format(timestr), paper)
+    im = Image.open("../document/image/image_{}.png".format(timestr))
     im = ImageOps.mirror(im)
     im.save(pdf_folder+'/image_{}.png'.format(timestr))
 
