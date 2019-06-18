@@ -3,6 +3,7 @@ import cv2
 import time
 import glob
 
+
 def detect_text(path):
     """Detects text in the file."""
     import os
@@ -26,9 +27,9 @@ def detect_text(path):
     return texts
 
 
-def write_ON_File(texts, timestr, word=False):
-    '''Writes the output text in a txt file'''
-    path = "../document/ocr/"
+def write_on_file(texts, timestr, word=False):
+    """Writes the output text in a txt file"""
+    path = "../output/ocr/"
     print("Saving documents #{}".format(len(texts)))
     if word:
         # pip install python-docx
@@ -45,13 +46,4 @@ def write_ON_File(texts, timestr, word=False):
             if len(text) > 0:
                 f.writelines(u"{}".format(text[0].description))
         f.close()
-    print("Saving document is completed")
-
-# def main():
-#     texts = detect_text("document/image/pdf20190618_172920")
-#     timestr = time.strftime("%Y%m%d_%H%M%S")
-#     write_ON_File(texts,timestr)
-#     write_ON_File(texts, timestr, word=True)
-#
-# if __name__ == '__main__':
-#     main()
+    print("Saving output is completed")

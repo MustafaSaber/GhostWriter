@@ -5,13 +5,13 @@ import cv2
 
 
 class Calibrator:
-
+    """Define a space to be able to write in"""
     def __init__(self, pipeline, profile, filters):
         self.DEPTH_SCALE = profile.get_device().first_depth_sensor().get_depth_scale() * 1000
         self.Edges = {}
         self.HEIGHT_THRESHOLD = 0
         for edgeStr in constants.EdgesStr:
-            self.claimEdge(pipeline, filters, edgeStr)
+            self.claim_edge(pipeline, filters, edgeStr)
         self.HEIGHT_THRESHOLD = (self.HEIGHT_THRESHOLD / 4) - constants.MARGIN
         print("Current Threshold is {}".format(self.HEIGHT_THRESHOLD))
         self.PAPER_WIDTH = self.Edges["TopLeft"][0] - self.Edges["TopRight"][0]
@@ -24,31 +24,29 @@ class Calibrator:
         self.PAPER_WIDTH = self.PAPER_WIDTH + (2 * constants.MARGIN)
         print(self.PAPER_WIDTH, self.HEIGHT_THRESHOLD, self.PAPER_HEIGHT)
 
-    def claimEdge(self, pipeline, filters, edge):
+    def claim_edge(self, pipeline, filters, edge):
+        """Get the Edge of the space we will write in"""
         cX, cY, Z = 0, 0, 0
         while True:
-            frame, depth = utility.Fetch(pipeline)
-            depth = utility.PostProcessing(filters, depth)
-            colorized_depth = utility.ColorizeDepth(depth)
+            frame, depth = utility.fetch(pipeline)
+            depth = utility.post_processing(filters, depth)
+            colorized_depth = utility.colorize_depth(depth)
 
             depth = np.asanyarray(depth.get_data())
-            #            _, frame = utility.align(frame, colorized_depth)
-            frameResized = imutils.resize(frame, width=constants.RESIZED_WIDTH)
-            # TODO: use object detection instead of color detection
+            frame_resized = imutils.resize(frame, width=constants.RESIZED_WIDTH)
 
-            cnts = utility.Contours(frameResized)
-            center = None
+            # TODO: use object detection instead of color detection
+            cnts = utility.process_contours(frame_resized)
 
             if len(cnts) > 0:
-                # TODO: nearest area
                 c = max(cnts, key=cv2.contourArea)
                 extBot = tuple(c[c[:, :, 1].argmax()][0])
                 ((x, y), radius) = cv2.minEnclosingCircle(c)
                 M = cv2.moments(c)
                 center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
-                # TODO: Recosider CONSTANT
+
                 if radius >= constants.ALLOWED_RADIUS:
-                    (cXr, cYr), (cX, cY) = utility.getCenter(center, (x, y))
+                    (cXr, cYr), (cX, cY) = utility.get_center(center, (x, y))
                     # cX, cY = extBot
                     # cX = int(round(cX * (constants.WIDTH / constants.RESIZED_WIDTH)))
                     # cY = int(round(cY * (constants.HEIGHT / constants.RESIZED_HEIGHT))) - 15
@@ -57,9 +55,9 @@ class Calibrator:
                     # TODO: remove after debugging
                     ###################################################################
                     text = "X: " + str(cX) + ",Y: " + str(cY) + ",Z: " + str(Z)
-                    cv2.circle(frameResized, (int(x), int(y)), int(radius), (0, 255, 255), 2)
-                    cv2.putText(frameResized, text, (0, 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (125, 125, 125), 2)
-                    cv2.circle(frameResized, (cXr, cYr), 2, (0, 0, 255), -1)
+                    cv2.circle(frame_resized, (int(x), int(y)), int(radius), (0, 255, 255), 2)
+                    cv2.putText(frame_resized, text, (0, 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (125, 125, 125), 2)
+                    cv2.circle(frame_resized, (cXr, cYr), 2, (0, 0, 255), -1)
                     cv2.circle(colorized_depth, (cX, cY), 2, (0, 255, 0), -1)
                     ###################################################################
             else:
@@ -68,7 +66,7 @@ class Calibrator:
             cv2.namedWindow('Frame', cv2.WINDOW_AUTOSIZE)
             cv2.namedWindow('Depth', cv2.WINDOW_AUTOSIZE)
 
-            cv2.imshow("Frame", frameResized)
+            cv2.imshow("Frame", frame_resized)
             cv2.imshow("Depth", colorized_depth)
 
             key = cv2.waitKey(1) & 0xFF
