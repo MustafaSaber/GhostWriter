@@ -6,45 +6,37 @@ import calibration
 import utility
 import imutils
 import time
-import align
+import pyrealsense2 as rs
 from fpdf import FPDF
-from PIL import Image, ImageTk
+from PIL import Image
 from PIL import ImageOps
-import tkintertable as tk
+import gcv_ocr
+import time
 
-def open_img(image):
-    img = Image.open(image)
-    #img = img.resize((250, 250), Image.ANTIALIAS)
-    #img = ImageTk.PhotoImage(image)
-    time.sleep(2)
-    panel = tk.Label(root, image=img)
-    panel.image = img
-    panel.pack()
+timestr = time.strftime("%Y%m%d_%H%M")
 
 
-def makePdf(pdfFileName, listPages, dir = ''):
-    if (dir):
+def makePdf(pdfFileName, listPages, dir=''):
+    if dir:
         dir += "/"
     cover = Image.open(dir + listPages)
     width, height = cover.size
-    pdf = FPDF(unit = "pt", format = [width, height])
+    pdf = FPDF(unit="pt", format=[width, height])
     pdf.add_page()
-    pdf.image(dir + listPages,0,0)
+    pdf.image(dir + listPages, 0, 0)
     pdf.output(dir + pdfFileName + ".pdf", "F")
     print("pdf")
 
-root = tk.Tk()
-
-saveButton = tk.Button(root,text ="Save",command = makePdf)
-saveButton.pack()
 
 pipeline, profile = utility.createPipline()
 filters = utility.createFilters()
-lastPoint = None
+points = None
+pts = None
+drawn = []
 time.sleep(2.0)
 
 config = calibration.Calibrator(pipeline, profile, filters)
-paper = np.zeros((config.PAPER_HEIGHT, config.PAPER_WIDTH, 3), np.uint8)
+paper = np.zeros((config.PAPER_HEIGHT, config.PAPER_WIDTH, 3), np.uint8) + 255
 print(paper.shape)
 
 # keep looping
@@ -54,28 +46,41 @@ while True:
         pipeline.stop()
         break
     elif key == ord("c"):
-        paper = np.zeros((config.PAPER_HEIGHT, config.PAPER_WIDTH, 3), np.uint8)
+        paper = np.zeros((config.PAPER_HEIGHT, config.PAPER_WIDTH, 3), np.uint8) + 255
+        drawn = []
+        points = None
 
     elif key == ord("s"):
-        cv2.imwrite("filename.png", paper)
-        im = Image.open("filename.png")
+        timestr = time.strftime("%Y%m%d_%H%M")
+        cv2.imwrite("document/image/image_{}.png".format(timestr), paper)
+        im = Image.open("document/image/image_{}.png".format(timestr))
         im = ImageOps.mirror(im)
-        im.save("filename2.png")
-        makePdf("firstTry", "filename2.png")
+        im.save("document/image/image_{}.png".format(timestr))
+        makePdf("document/pdf/pdf_{}.png".format(timestr), "document/image/image_{}.png".format(timestr))
+        text = gcv_ocr.detect_text("document/image/image_{}.png".format(timestr))
+        gcv_ocr.write_ON_File(text,timestr)
+
+    # elif key == ord("o"):
+
+
 
     frame, depth = utility.Fetch(pipeline)
+    intrinsics = depth.profile.as_video_stream_profile().intrinsics
     depth = utility.PostProcessing(filters, depth)
+
     colorized_depth = utility.ColorizeDepth(depth)
     depth = np.asanyarray(depth.get_data())
-    _,frame = align.align(frame,depth,config.DEPTH_SCALE,constants.THRESHOLD)
+    # _, frame = utility.align(frame, colorized_depth)
 
     frameResized = imutils.resize(frame, width=constants.RESIZED_WIDTH)
     # TODO: use object detection instead of color detection
+
     cnts = utility.Contours(frameResized)
     center = None
 
     if len(cnts) > 0:
         c = max(cnts, key=cv2.contourArea)
+        extBot = tuple(c[c[:, :, 1].argmax()][0])
         ((x, y), radius) = cv2.minEnclosingCircle(c)
         M = cv2.moments(c)
         center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
@@ -83,21 +88,31 @@ while True:
         if radius >= constants.ALLOWED_RADIUS:
             # TODO: add screen to world x,y transformer
             (cXr, cYr), (cX, cY) = utility.getCenter(center, (x, y))
+            cXp, cYp, _ = utility.transformer(cX, cY, intrinsics, config.DEPTH_SCALE)
+            # cX, cY = extBot
+            # cX = int(round(cX * (constants.WIDTH / constants.RESIZED_WIDTH)))
+            # cY = int(round(cY * (constants.HEIGHT / constants.RESIZED_HEIGHT))) - 15
             # TODO: sync color and depth frame to avoid wrong depth calculation
             Z = int(depth[cY, cX] * config.DEPTH_SCALE)
             dZ = min(max(0, int(Z - config.Near)), config.Far)
             if cY < config.HEIGHT_THRESHOLD or not (config.Near < Z < config.Far) or not (
                     config.Right < cX < config.Left):
-                lastPoint = None
+                if points is not None:
+                    drawn.append(points)
+                points = None
+
+
             else:
                 distanceFactor = ((1 - dZ / paper.shape[1]) + (dZ / config.PAPER_HEIGHT) * config.PrespectiveEffect)
-                dX = round((min(max(0, int(cX - config.Right)), config.Left) - config.PAPER_WIDTH / 2) * distanceFactor
-                           + config.PAPER_WIDTH / 2)
-                if lastPoint is None:
-                    lastPoint = (dX, dZ)
+                dX = round(
+                    (min(max(0, int(cX - config.Right)), config.Left)))  # - config.PAPER_WIDTH / 2) * distanceFactor
+                # + config.PAPER_WIDTH / 2)
+                if points is None:
+                    points = [[dX, dZ]]
                 else:
-                    cv2.line(paper, lastPoint, (dX, dZ), (255, 255, 255), 1)
-                    lastPoint = (dX, dZ)
+                    points.append([dX, dZ])
+                    pts = np.asanyarray(points, np.int32).reshape((-1, 1, 2))
+                    cv2.polylines(paper, [pts], False, (0, 0, 0), lineType=cv2.LINE_AA)
 
             # TODO: remove after debugging
             ###################################################################
@@ -109,29 +124,20 @@ while True:
             ###################################################################
     viewport = paper.copy()
     viewport = cv2.flip(viewport, 1)
+    # viewport = cv2.blur(viewport, (5, 5), 0)
+    # kernel = np.ones((5, 5), np.float32) / 25
+    # viewport = cv2.filter2D(viewport, -1, kernel)
+    cv2.namedWindow('Frame', cv2.WINDOW_AUTOSIZE)
+    cv2.namedWindow('Depth', cv2.WINDOW_AUTOSIZE)
+    cv2.namedWindow('Paper', cv2.WINDOW_NORMAL)
+    cv2.resizeWindow('Paper', 480, 640)
 
-    # cv2.namedWindow('Frame', cv2.WINDOW_AUTOSIZE)
-    # cv2.namedWindow('Depth', cv2.WINDOW_AUTOSIZE)
-    # cv2.namedWindow('Paper', cv2.WINDOW_NORMAL)
-    # cv2.resizeWindow('Paper', 480, 640)
+    cv2.imshow("Frame", frameResized)
+    cv2.imshow("Depth", colorized_depth)
+    cv2.imshow("Paper", viewport)
 
-
-    #cv2.imshow("Frame", frameResized)
-    #cv2.imshow("Depth", colorized_depth)
-    #cv2.imshow("Paper", viewport)
-
-    # label = tk.Label(root, textvariable=paper)
-    # label.pack()
-    cv2.imwrite("paper.png", paper)
-    #img = Image.fromarray(paper, 'RGB')
-    #open_img("paper.jpg")
-    #open_img(img)
-    btn = tk.Button(root, text='open image', command=open_img("paper.png")).pack()
-    var = tk.StringVar()
-    label = tk.Label(root, textvariable=var)
-    var.set("Ghost Writer")
-    label.pack()
-    root.mainloop()
-
+with open('SavedPoints\points_{}.txt'.format(timestr), 'w') as f:
+    for item in drawn:
+        f.write("%s\n".replace("[","").replace("]","") % item)
 # close all windows
 cv2.destroyAllWindows()

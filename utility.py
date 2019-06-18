@@ -33,11 +33,11 @@ def createFilters():
 
 def Fetch(Pipeline):
     frames = Pipeline.wait_for_frames()
-    align = rs.align(rs.stream.color)
+    align = rs.align(rs.stream.depth)
     frames = align.process(frames)
     color_frame_preprocessing = frames.get_color_frame()
     Depth_data = frames.get_depth_frame()
-    depth_image = np.asanyarray(Depth_data.get_data())
+    # depth_image = np.asanyarray(Depth_data.get_data())
     RGB_frame = np.asanyarray(color_frame_preprocessing.get_data())
     # grey_color = 153
     # depth_image_3D = np.dstack((depth_image, depth_image, depth_image))
