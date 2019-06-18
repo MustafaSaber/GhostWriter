@@ -1,0 +1,14 @@
+ALLOWED_RADIUS = 15
+WIDTH = 640
+HEIGHT = 480
+RESIZED_WIDTH = 600
+RESIZED_HEIGHT = 450
+FPS = 30
+MARGIN = 3
+DEPTH_SCALE = 0
+THRESHOLD = 750.00
+EdgesStr = ["TopLeft", "TopRight", "BottomRight", "BottomLeft"]
+blueLower = (100, 150, 20)
+blueUpper = (130, 255, 255)
+clipping_threshold = 600
+DS5_product_ids = ["0AD1", "0AD2", "0AD3", "0AD4", "0AD5", "0AF6", "0AFE", "0AFF", "0B00", "0B01", "0B03", "0B07"]
