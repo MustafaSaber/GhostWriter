@@ -4,9 +4,10 @@ from src.Globals import constants, utility
 import cv2
 from src.configs.configure import CameraHandler
 
+
 class Calibrator:
     """Define a space to be able to write in"""
-    def __init__(self, pipeline, profile, filters):
+    def __init__(self, profile, filters):
         self.camera_handler = CameraHandler.getInstance()
         self.DEPTH_SCALE = profile.get_device().first_depth_sensor().get_depth_scale() * 1000
         self.Edges = {}

@@ -21,7 +21,7 @@ class Tracker:
         self.points = None
         self.pts = None
         self.drawn = []
-        self.config = calibration.Calibrator(self.pipeline, self.profile, self.filters)
+        self.config = calibration.Calibrator(self.profile, self.filters)
         self.paper = np.zeros((self.config.PAPER_HEIGHT, self.config.PAPER_WIDTH, 3), np.uint8) + 255
         print(self.paper.shape)
         self.track()
