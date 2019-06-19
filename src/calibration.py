@@ -6,12 +6,13 @@ import cv2
 
 class Calibrator:
     """Define a space to be able to write in"""
-    def __init__(self, pipeline, profile, filters):
+    def __init__(self, pipeline, profile, filters, camera_handler):
+        self.camera_handler = camera_handler
         self.DEPTH_SCALE = profile.get_device().first_depth_sensor().get_depth_scale() * 1000
         self.Edges = {}
         self.HEIGHT_THRESHOLD = 0
         for edgeStr in constants.EdgesStr:
-            self.claim_edge(pipeline, filters, edgeStr)
+            self.claim_edge(filters, edgeStr)
         self.HEIGHT_THRESHOLD = (self.HEIGHT_THRESHOLD / 4) - constants.MARGIN
         print("Current Threshold is {}".format(self.HEIGHT_THRESHOLD))
         self.PAPER_WIDTH = self.Edges["TopLeft"][0] - self.Edges["TopRight"][0]
@@ -24,13 +25,11 @@ class Calibrator:
         self.PAPER_WIDTH = self.PAPER_WIDTH + (2 * constants.MARGIN)
         print(self.PAPER_WIDTH, self.HEIGHT_THRESHOLD, self.PAPER_HEIGHT)
 
-    def claim_edge(self, pipeline, filters, edge):
+    def claim_edge(self, filters, edge):
         """Get the Edge of the space we will write in"""
         cX, cY, Z = 0, 0, 0
         while True:
-            frame, depth = utility.fetch(pipeline)
-            depth = utility.post_processing(filters, depth)
-            colorized_depth = utility.colorize_depth(depth)
+            frame, depth, colorized_depth = self.camera_handler.process_frames(filters)
 
             depth = np.asanyarray(depth.get_data())
             frame_resized = imutils.resize(frame, width=constants.RESIZED_WIDTH)

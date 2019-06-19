@@ -6,23 +6,24 @@ import imutils
 from src import calibration
 import time
 import os
+from src.configs.configure import CameraHandler
 
 
 class Tracker:
     """Track object movement and write according to it's movement"""
     def __init__(self):
+        self.camera_handler = CameraHandler()
         self.timestr = time.strftime("%Y%m%d_%H%M%S")
         self.pdf_folder = '../output/image/pdf{}'.format(self.timestr)
         os.mkdir(self.pdf_folder)
-        self.pipeline, self.profile = utility.create_pipline()
-        self.filters = utility.create_filters()
+        self.pipeline, self.profile = self.camera_handler.create_pipline()
+        self.filters = self.camera_handler.create_filters()
         self.points = None
         self.pts = None
         self.drawn = []
         self.config = calibration.Calibrator(self.pipeline, self.profile, self.filters)
         self.paper = np.zeros((self.config.PAPER_HEIGHT, self.config.PAPER_WIDTH, 3), np.uint8) + 255
         print(self.paper.shape)
-
         self.track()
 
     def track(self):
@@ -49,11 +50,7 @@ class Tracker:
                 self.drawn = []
                 self.points = None
 
-            frame, depth = utility.fetch(self.pipeline)
-            depth = utility.post_processing(self.filters, depth)
-
-            colorized_depth = utility.colorize_depth(depth)
-            depth = np.asanyarray(depth.get_data())
+            frame, depth, colorized_depth = self.camera_handler.process_frames(self.filters)
 
             frame_resized = imutils.resize(frame, width=constants.RESIZED_WIDTH)
             # TODO: use object detection instead of color detection
