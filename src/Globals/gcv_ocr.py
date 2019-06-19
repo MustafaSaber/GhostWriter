@@ -9,7 +9,7 @@ def detect_text(path):
     import os
     import io
     from google.cloud import vision
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "../auth/ghostwriterocr-f95f43035269.json"
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "auth/ghostwriterocr-f95f43035269.json"
     client = vision.ImageAnnotatorClient()
     texts = []
     print("Recognizing Words")
@@ -29,7 +29,7 @@ def detect_text(path):
 
 def write_on_file(texts, timestr, word=False):
     """Writes the output text in a txt file"""
-    path = "../output/ocr/"
+    path = "output/ocr/"
     print("Saving documents #{}".format(len(texts)))
     if word:
         # pip install python-docx

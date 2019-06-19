@@ -12,11 +12,11 @@ from src.configs.configure import CameraHandler
 class Tracker:
     """Track object movement and write according to it's movement"""
     def __init__(self):
-        self.camera_handler = CameraHandler()
+        self.camera_handler = CameraHandler.getInstance()
         self.timestr = time.strftime("%Y%m%d_%H%M%S")
-        self.pdf_folder = '../output/image/pdf{}'.format(self.timestr)
+        self.pdf_folder = 'output/image/pdf{}'.format(self.timestr)
         os.mkdir(self.pdf_folder)
-        self.pipeline, self.profile = self.camera_handler.create_pipline()
+        self.pipeline, self.profile = self.camera_handler.pipeline, self.camera_handler.profile
         self.filters = self.camera_handler.create_filters()
         self.points = None
         self.pts = None
@@ -40,7 +40,7 @@ class Tracker:
 
             elif key == ord("s"):
                 utility.save_jpg(self.pdf_folder, self.paper)
-                utility.save_pdf("pdf_{}".format(self.timestr), self.pdf_folder, '../output/pdf')
+                utility.save_pdf("pdf_{}".format(self.timestr), self.pdf_folder, 'output/pdf')
                 text = gcv_ocr.detect_text(self.pdf_folder)
                 gcv_ocr.write_on_file(text, self.timestr)
 
@@ -115,7 +115,7 @@ class Tracker:
 
     def save(self):
         """Saves the current drawn points"""
-        with open('../output/SavedPoints/points_{}.txt'.format(self.timestr), 'w') as f:
+        with open('output/SavedPoints/points_{}.txt'.format(self.timestr), 'w') as f:
             for item in self.drawn:
                 f.write("%s\n".replace("[", "").replace("]", "") % item)
 

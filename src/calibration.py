@@ -2,12 +2,12 @@ import numpy as np
 import imutils
 from src.Globals import constants, utility
 import cv2
-
+from src.configs.configure import CameraHandler
 
 class Calibrator:
     """Define a space to be able to write in"""
-    def __init__(self, pipeline, profile, filters, camera_handler):
-        self.camera_handler = camera_handler
+    def __init__(self, pipeline, profile, filters):
+        self.camera_handler = CameraHandler.getInstance()
         self.DEPTH_SCALE = profile.get_device().first_depth_sensor().get_depth_scale() * 1000
         self.Edges = {}
         self.HEIGHT_THRESHOLD = 0
@@ -30,8 +30,6 @@ class Calibrator:
         cX, cY, Z = 0, 0, 0
         while True:
             frame, depth, colorized_depth = self.camera_handler.process_frames(filters)
-
-            depth = np.asanyarray(depth.get_data())
             frame_resized = imutils.resize(frame, width=constants.RESIZED_WIDTH)
 
             # TODO: use object detection instead of color detection

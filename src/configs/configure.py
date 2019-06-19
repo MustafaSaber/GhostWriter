@@ -4,23 +4,37 @@ import time
 import json
 
 from src.Globals import constants
-from src.Globals.constants import DS5_product_ids
 import numpy as np
 
 
 class CameraHandler:
+    __instance = None
+
+    @staticmethod
+    def getInstance():
+        """ Static access method. """
+        if CameraHandler.__instance is None:
+            CameraHandler()
+        return CameraHandler.__instance
 
     def __init__(self):
-        self.pipeline = None
-        self.config = None
-        self.profile = None
+        self.load()
+        self.pipeline = rs.pipeline()
+        self.config = rs.config()
+        self.config.enable_stream(rs.stream.depth, constants.WIDTH, constants.HEIGHT, rs.format.z16, constants.FPS)
+        self.config.enable_stream(rs.stream.color, constants.WIDTH, constants.HEIGHT, rs.format.bgr8, constants.FPS)
+        self.profile = self.pipeline.start(self.config)
+        if CameraHandler.__instance is not None:
+            raise Exception("This class is a singleton!")
+        else:
+            CameraHandler.__instance = self
 
     def find_device_that_supports_advanced_mode(self):
         ctx = rs.context()
         devices = ctx.query_devices()
         for dev in devices:
             if dev.supports(rs.camera_info.product_id) and str(dev.get_info(rs.camera_info.product_id)) \
-                    in DS5_product_ids:
+                    in constants.DS5_product_ids:
                 return dev
         raise Exception("No device that supports advanced mode was found")
 
@@ -50,16 +64,6 @@ class CameraHandler:
         except Exception as e:
             print(e)
             pass
-
-    def create_pipline(self):
-        """Load IntelRealsense Camera and get depth and color frames"""
-        self.load()
-        self.pipeline = rs.pipeline()
-        self.config = rs.config()
-        self.config.enable_stream(rs.stream.depth, constants.WIDTH, constants.HEIGHT, rs.format.z16, constants.FPS)
-        self.config.enable_stream(rs.stream.color, constants.WIDTH, constants.HEIGHT, rs.format.bgr8, constants.FPS)
-        self.profile = self.pipeline.start(self.config)
-        return self.pipeline, self.profile
 
     def create_filters(self):
         spatial = rs.spatial_filter()

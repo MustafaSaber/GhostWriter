@@ -1,9 +1,6 @@
-import pyrealsense2 as rs
-import numpy as np
 import imutils
 from src.Globals import constants
 import cv2
-from src.configs import configure
 from fpdf import FPDF
 from PIL import Image
 from PIL import ImageOps
@@ -38,8 +35,8 @@ def get_center(center_point, centroid):
 
 def save_jpg(pdf_folder, paper):
     timestr = time.strftime("%Y%m%d_%H%M%S")
-    cv2.imwrite("../output/image/image_{}.png".format(timestr), paper)
-    im = Image.open("../output/image/image_{}.png".format(timestr))
+    cv2.imwrite("output/image/image_{}.png".format(timestr), paper)
+    im = Image.open("output/image/image_{}.png".format(timestr))
     im = ImageOps.mirror(im)
     im.save(pdf_folder+'/image_{}.png'.format(timestr))
 
