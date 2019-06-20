@@ -1,7 +1,7 @@
 # import the necessary packages
 import numpy as np
 import cv2
-from src.Globals import constants, utility, gcv_ocr
+from src.Globals import constants, helper_functions, gcv_ocr
 import imutils
 from src import calibration
 import time
@@ -12,7 +12,7 @@ from src.configs.configure import CameraHandler
 class Tracker:
     """Track object movement and write according to it's movement"""
     def __init__(self):
-        self.camera_handler = CameraHandler.getInstance()
+        self.camera_handler = CameraHandler.get_instance()
         self.timestr = time.strftime("%Y%m%d_%H%M%S")
         self.pdf_folder = 'output/image/pdf{}'.format(self.timestr)
         os.mkdir(self.pdf_folder)
@@ -21,7 +21,7 @@ class Tracker:
         self.points = None
         self.pts = None
         self.drawn = []
-        self.config = calibration.Calibrator(self.profile, self.filters)
+        self.config = calibration.Calibrator(self.filters)
         self.paper = np.zeros((self.config.PAPER_HEIGHT, self.config.PAPER_WIDTH, 3), np.uint8) + 255
         print(self.paper.shape)
         self.track()
@@ -39,13 +39,13 @@ class Tracker:
                 self.points = None
 
             elif key == ord("s"):
-                utility.save_jpg(self.pdf_folder, self.paper)
-                utility.save_pdf("pdf_{}".format(self.timestr), self.pdf_folder, 'output/pdf')
+                helper_functions.save_jpg(self.pdf_folder, self.paper)
+                helper_functions.save_pdf("pdf_{}".format(self.timestr), self.pdf_folder, 'output/pdf')
                 text = gcv_ocr.detect_text(self.pdf_folder)
                 gcv_ocr.write_on_file(text, self.timestr)
 
             elif key == ord("n"):
-                utility.save_jpg(self.pdf_folder, self.paper)
+                helper_functions.save_jpg(self.pdf_folder, self.paper)
                 self.paper = np.zeros((self.config.PAPER_HEIGHT, self.config.PAPER_WIDTH, 3), np.uint8) + 255
                 self.drawn = []
                 self.points = None
@@ -55,7 +55,7 @@ class Tracker:
             frame_resized = imutils.resize(frame, width=constants.RESIZED_WIDTH)
             # TODO: use object detection instead of color detection
 
-            cnts = utility.process_contours(frame_resized)
+            cnts = helper_functions.process_contours(frame_resized)
 
             if len(cnts) > 0:
                 c = max(cnts, key=cv2.contourArea)
@@ -66,7 +66,7 @@ class Tracker:
 
                 if radius >= constants.ALLOWED_RADIUS:
                     # TODO: add screen to world x,y transformer
-                    (cXr, cYr), (cX, cY) = utility.get_center(center, (x, y))
+                    (cXr, cYr), (cX, cY) = helper_functions.get_center(center, (x, y))
                     # cX, cY = extBot
                     # cX = int(round(cX * (constants.WIDTH / constants.RESIZED_WIDTH)))
                     # cY = int(round(cY * (constants.HEIGHT / constants.RESIZED_HEIGHT))) - 15

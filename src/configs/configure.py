@@ -11,7 +11,7 @@ class CameraHandler:
     __instance = None
 
     @staticmethod
-    def getInstance():
+    def get_instance():
         """ Static access method. """
         if CameraHandler.__instance is None:
             CameraHandler()
@@ -29,7 +29,8 @@ class CameraHandler:
         else:
             CameraHandler.__instance = self
 
-    def find_device_that_supports_advanced_mode(self):
+    @staticmethod
+    def find_device_that_supports_advanced_mode():
         ctx = rs.context()
         devices = ctx.query_devices()
         for dev in devices:

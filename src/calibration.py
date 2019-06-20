@@ -1,15 +1,15 @@
 import numpy as np
 import imutils
-from src.Globals import constants, utility
+from src.Globals import constants, helper_functions
 import cv2
 from src.configs.configure import CameraHandler
 
 
 class Calibrator:
     """Define a space to be able to write in"""
-    def __init__(self, profile, filters):
-        self.camera_handler = CameraHandler.getInstance()
-        self.DEPTH_SCALE = profile.get_device().first_depth_sensor().get_depth_scale() * 1000
+    def __init__(self, filters):
+        self.camera_handler = CameraHandler.get_instance()
+        self.DEPTH_SCALE = self.camera_handler.profile.get_device().first_depth_sensor().get_depth_scale() * 1000
         self.Edges = {}
         self.HEIGHT_THRESHOLD = 0
         for edgeStr in constants.EdgesStr:
@@ -34,7 +34,7 @@ class Calibrator:
             frame_resized = imutils.resize(frame, width=constants.RESIZED_WIDTH)
 
             # TODO: use object detection instead of color detection
-            cnts = utility.process_contours(frame_resized)
+            cnts = helper_functions.process_contours(frame_resized)
 
             if len(cnts) > 0:
                 c = max(cnts, key=cv2.contourArea)
@@ -44,7 +44,7 @@ class Calibrator:
                 center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
 
                 if radius >= constants.ALLOWED_RADIUS:
-                    (cXr, cYr), (cX, cY) = utility.get_center(center, (x, y))
+                    (cXr, cYr), (cX, cY) = helper_functions.get_center(center, (x, y))
                     # cX, cY = extBot
                     # cX = int(round(cX * (constants.WIDTH / constants.RESIZED_WIDTH)))
                     # cY = int(round(cY * (constants.HEIGHT / constants.RESIZED_HEIGHT))) - 15
