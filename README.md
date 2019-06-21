@@ -1,4 +1,4 @@
-# ![Alt Logo](Required Multimedia/GP_Logo.png?raw=true "logo") GhostWriter 
+# ![alt text](https://github.com/M-Mabrouk/GhostWriter/blob/master/Required%20Multimedia/GP_Logo.png) GhostWriter 
 
 A simple way to write and and take notes freely without the need for a special electronic pen or tablet
 
