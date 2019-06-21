@@ -40,7 +40,7 @@ class Tracker:
 
             elif key == ord("s"):
                 helper_functions.save_jpg(self.pdf_folder, self.paper)
-                helper_functions.save_pdf("pdf_{}".format(self.timestr), self.pdf_folder, 'output/pdf')
+                helper_functions.save_pdf("pdf_{}".format(self.timestr), self.pdf_folder, self.config.PAPER_HEIGHT, self.config.PAPER_WIDTH, 'output/pdf')
                 text = gcv_ocr.detect_text(self.pdf_folder)
                 gcv_ocr.write_on_file(text, self.timestr)
 
@@ -103,15 +103,13 @@ class Tracker:
                     ###################################################################
             viewport = self.paper.copy()
             viewport = cv2.flip(viewport, 1)
+            viewport = cv2.resize(viewport, (360, 480))
+            merged_frame = np.hstack((frame, colorized_depth , viewport))
+            merged_frame = cv2.resize(merged_frame, (820, 240))
 
             cv2.namedWindow('Frame', cv2.WINDOW_AUTOSIZE)
-            cv2.namedWindow('Depth', cv2.WINDOW_AUTOSIZE)
-            cv2.namedWindow('Paper', cv2.WINDOW_NORMAL)
-            cv2.resizeWindow('Paper', 480, 640)
-
-            cv2.imshow("Frame", frame_resized)
-            cv2.imshow("Depth", colorized_depth)
-            cv2.imshow("Paper", viewport)
+            cv2.imshow("Frame", merged_frame)
+            cv2.moveWindow("Frame", 0, 0)
 
     def save(self):
         """Saves the current drawn points"""

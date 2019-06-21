@@ -53,19 +53,17 @@ class Calibrator:
                     # TODO: remove after debugging
                     ###################################################################
                     text = "X: " + str(cX) + ",Y: " + str(cY) + ",Z: " + str(Z)
-                    cv2.circle(frame_resized, (int(x), int(y)), int(radius), (0, 255, 255), 2)
+                    cv2.circle(frame, (int(cX), int(cY)), int(radius), (0, 255, 255), 2)
                     cv2.putText(frame_resized, text, (0, 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (125, 125, 125), 2)
-                    cv2.circle(frame_resized, (cXr, cYr), 2, (0, 0, 255), -1)
+                    cv2.circle(frame, (cX, cY), 2, (0, 0, 255), -1)
                     cv2.circle(colorized_depth, (cX, cY), 2, (0, 255, 0), -1)
                     ###################################################################
             else:
                 cX, cY, Z = 0, 0, 0
 
             cv2.namedWindow('Frame', cv2.WINDOW_AUTOSIZE)
-            cv2.namedWindow('Depth', cv2.WINDOW_AUTOSIZE)
-
-            cv2.imshow("Frame", frame_resized)
-            cv2.imshow("Depth", colorized_depth)
+            cv2.imshow("Frame", np.hstack((frame,colorized_depth)))
+            cv2.moveWindow("Frame", 0, 0)
 
             key = cv2.waitKey(1) & 0xFF
             if key == ord("e"):

@@ -41,11 +41,11 @@ def save_jpg(pdf_folder, paper):
     im.save(pdf_folder+'/image_{}.png'.format(timestr))
 
 
-def save_pdf(pdf_filename, pages_list, directory=''):
+def save_pdf(pdf_filename, pages_list, paper_height, paper_width, directory=''):
     if directory:
         directory += "/"
 
-    pdf = FPDF(unit="pt", format=[1000, 1000])
+    pdf = FPDF(unit="pt", format=[paper_width, paper_height])
     for img in glob.glob(pages_list + '/*.*'):
         try:
             pdf.add_page()
