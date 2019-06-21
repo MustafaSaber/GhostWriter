@@ -23,4 +23,4 @@ Intel RealSense D415/D435 Depth Camera
 
 ## Acknowledgments
 * Dr. Ahmed Shawky Moussa
-* Sally Samy 
+* Sally Samy - Designer
