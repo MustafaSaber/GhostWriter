@@ -80,10 +80,8 @@ class Tracker:
                         self.points = None
 
                     else:
-                        distanceFactor = ((1 - dZ / self.paper.shape[1]) +
-                                          (dZ / self.config.PAPER_HEIGHT) * self.config.PrespectiveEffect)
-                        dX = round(
-                            (min(max(0, int(cX - self.config.Right)), self.config.Left)))
+                        #distanceFactor = ((1 - dZ / self.paper.shape[1]) + (dZ / self.config.PAPER_HEIGHT) * self.config.PrespectiveEffect)
+                        dX = round((min(max(0, int(cX - self.config.Right)), self.config.Left)))
                         # - config.PAPER_WIDTH / 2) * distanceFactor
                         # + config.PAPER_WIDTH / 2)
                         if self.points is None:
