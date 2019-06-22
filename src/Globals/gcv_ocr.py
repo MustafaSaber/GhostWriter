@@ -6,23 +6,26 @@ import glob
 
 def detect_text(path):
     """Detects text in the file."""
-    import os
-    import io
-    from google.cloud import vision
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "auth/ghostwriterocr-f95f43035269.json"
-    client = vision.ImageAnnotatorClient()
     texts = []
-    print("Recognizing Words")
-    for img in glob.glob(path + '/*.*'):
-        with io.open(img, 'rb') as image_file:
-            content = image_file.read()
+    try:
+        import os
+        import io
+        from google.cloud import vision
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "auth/ghostwriterocr-f95f43035269.json"
+        client = vision.ImageAnnotatorClient()
+        print("Recognizing Words")
+        for img in glob.glob(path + '/*.*'):
+            with io.open(img, 'rb') as image_file:
+                content = image_file.read()
 
-        image = vision.types.Image(content=content)
+            image = vision.types.Image(content=content)
 
-        response = client.text_detection(image=image, image_context={"language_hints": ["en"]})
-        text = response.text_annotations
-        texts += [text]
-    print("Recognizing Words completed")
+            response = client.text_detection(image=image, image_context={"language_hints": ["en"]})
+            text = response.text_annotations
+            texts += [text]
+        print("Recognizing Words completed")
+    except:
+        print("No Internet")
 
     return texts
 
