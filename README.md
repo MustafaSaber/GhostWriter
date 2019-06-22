@@ -24,5 +24,5 @@ Intel RealSense D415/D435 Depth Camera
 2. the script currently uses blue color detection to locate the pen until it is replaced with SDD object detection
 
 ## Acknowledgments
-* Dr. Ahmed Shawky Moussa
+* Dr. Ahmed Shawky Moussa - Project Supervisor
 * Sally Samy - Designer
