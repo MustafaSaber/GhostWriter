@@ -2,6 +2,9 @@
 
 A simple way to write and and take notes freely without the need for a special electronic pen or tablet
 
+![Demo GIF](Required Multimedia/FCI_GIF.gif)
+
+
 ## Hardware Requirements:  
 Intel RealSense D415/D435 Depth Camera
 
