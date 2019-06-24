@@ -31,7 +31,7 @@ Intel RealSense D415/D435 Depth Camera
 2. The script currently uses blue color detection to locate the pen until it is replaced with SDD object detection
 
 ## License
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the MIT License - see the [LICENSE.md](https://github.com/M-Mabrouk/GhostWriter/blob/master/LICENSE) file for details
 
 ## Acknowledgments
 * Dr. Ahmed Shawky Moussa - Project Supervisor
