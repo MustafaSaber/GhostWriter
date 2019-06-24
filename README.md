@@ -9,15 +9,18 @@ Intel RealSense D415/D435 Depth Camera
 
 ## Python Requirements: 
 ### modules:
+````
 * pyrealsense2  
 * numpy  
 * cv2  
 * imutils  
 * fpdf
 * Google Cloud Vision
-
-### version:  
+````
+### version:
+````
 * python 3.6
+````
 
 ## How To Use
 1. Plug the camera in your computer
